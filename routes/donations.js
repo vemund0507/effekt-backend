@@ -7,6 +7,8 @@ const urlEncodeParser = bodyParser.urlencoded({ extended: true })
 const apicache = require('apicache')
 const cache = apicache.middleware
 const authMiddleware = require('../custom_modules/authorization/authMiddleware')
+const multer = require('multer')
+const upload = multer({dest: 'tmp/csv'})
 
 const authRoles = require('../enums/authorizationRoles')
 const methods = require('../enums/methods')
@@ -17,6 +19,7 @@ const vipps = require('../custom_modules/vipps')
 const dateRangeHelper = require('../custom_modules/dateRangeHelper')
 const donationHelpers = require('../custom_modules/donationHelpers')
 const rateLimit = require('express-rate-limit')
+const historicParser = require('../custom_modules/parsers/historic_donations')
 
 router.post("/register", async (req,res,next) => {
   if (!req.body) return res.sendStatus(400)
@@ -354,6 +357,74 @@ router.post("/history/email", historyRateLimit, async (req, res, next) => {
   catch(ex) {
       next(ex)
   }
+})
+
+router.post("/history/register",
+  upload.single('historic_donations'),
+  authMiddleware(authRoles.write_all_donations),
+  // urlEncodeParser,
+  async (req, res, next) => {
+    try {
+      // Respond with bad request status code if no file was included in the request
+      if (!req.files && !req.files.historic_donations) return res.sendStatus(400)
+      console.log(req.files.historic_donations, req.body)
+
+      let parsedData = historicParser.parseHistoric(req.files.historic_donations.data)
+      console.log(parsedData)
+      let successes = []
+      let failures = []
+
+      for (let donation of parsedData) {
+        console.log(donation.name, donation.email)
+        if (donation.email != '' && donation.email != null) {
+          const emailIDResult = await DAO.donors.getIDbyEmail(donation.email)
+          console.log(`Email ID: ${emailIDResult}`)
+          if (emailIDResult != null) {
+            console.log('ID found by email')
+            successes.push(donation)
+            continue
+          }
+        }
+
+        if (donation.name != '' && donation.name != null) {
+          const nameSearch = await DAO.donors.exact_name_search(donation.name)
+          console.log(`Name search: ${nameSearch}`)
+          if (nameSearch != null) {
+            if (nameSearch.length == 1) {
+              console.log('One ID found by name search')
+              console.log(nameSearch[0])
+              successes.push(donation)
+              continue
+            } else {
+              console.log('More than one ID found by name search')
+              failures.push(donation)
+              for (let value of nameSearch) {
+                console.log(value)
+              }
+              continue
+            }
+          }
+        } else {
+          console.log(`Empty name for donation: ${donation}`)
+        }
+
+        failures.push(donation)
+      }
+
+      // TODO: Check if the specific donation exists already
+
+      res.json({
+        status: 200,
+        content: {
+          success: successes,
+          failures: failures
+        }
+      })
+    }
+
+    catch(ex) {
+      next(ex)
+    }
 })
 
 module.exports = router

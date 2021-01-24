@@ -1,5 +1,5 @@
 var pool
-
+const yoursql = require('mysql2')
 /**
  * @typedef Donor
  * @prop {number} id
@@ -126,11 +126,49 @@ async function search(query) {
                     registered: donor.date_registered
                 }
             }))
-        } 
+        }
         else {
             return null
         }
-    } 
+    }
+    catch(ex) {
+        con.release()
+        throw ex
+    }
+}
+
+/**
+ * Searches for a user with name exactly matching the query
+ * @param {string} query A query string trying to match against full name
+ * @returns {Array<Donor>} An array of donor objects
+ */
+async function exact_name_search(query) {
+    try {
+        var con = await pool.getConnection()
+
+        var [result] = await con.execute(`SELECT * FROM Donors 
+            WHERE 
+                full_name=?
+                
+            LIMIT 100`, [query])
+
+        con.release()
+        
+        if (result.length > 0) {
+            return(result.map((donor) => {
+                return {
+                    id: donor.ID,
+                    name: donor.full_name,
+                    email: donor.email,
+                    ssn: donor.ssn,
+                    registered: donor.date_registered
+                }
+            }))
+        }
+        else {
+            return null
+        }
+    }
     catch(ex) {
         con.release()
         throw ex
@@ -220,6 +258,7 @@ module.exports = {
     getIDbyEmail,
     getByKID,
     search,
+    exact_name_search,
     add,
     updateSsn,
     updateNewsletter,
