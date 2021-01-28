@@ -20,6 +20,7 @@ const dateRangeHelper = require('../custom_modules/dateRangeHelper')
 const donationHelpers = require('../custom_modules/donationHelpers')
 const rateLimit = require('express-rate-limit')
 const historicParser = require('../custom_modules/parsers/historic_donations')
+const moment = require('moment')
 
 router.post("/register", async (req,res,next) => {
   if (!req.body) return res.sendStatus(400)
@@ -374,44 +375,71 @@ router.post("/history/register",
       let successes = []
       let failures = []
 
+      const organizaitons = await DAO.organizations.getAll()
+
       for (let donation of parsedData) {
         console.log(donation.name, donation.email)
+        var donorID
         if (donation.email != '' && donation.email != null) {
           const emailIDResult = await DAO.donors.getIDbyEmail(donation.email)
           console.log(`Email ID: ${emailIDResult}`)
           if (emailIDResult != null) {
             console.log('ID found by email')
+            donorID = emailIDResult
             successes.push(donation)
-            continue
           }
         }
 
-        if (donation.name != '' && donation.name != null) {
+        if (!donorID && donation.name != '' && donation.name != null) {
           const nameSearch = await DAO.donors.exact_name_search(donation.name)
           console.log(`Name search: ${nameSearch}`)
           if (nameSearch != null) {
             if (nameSearch.length == 1) {
               console.log('One ID found by name search')
               console.log(nameSearch[0])
+              donorID = nameSearch[0].id
               successes.push(donation)
-              continue
             } else {
               console.log('More than one ID found by name search')
               failures.push(donation)
               for (let value of nameSearch) {
                 console.log(value)
               }
-              continue
             }
           }
-        } else {
-          console.log(`Empty name for donation: ${donation}`)
         }
+
+        if (donorID) {
+          var donationExists = false
+          // Check if donation exists
+          var donationHistory = await DAO.donations.getHistory(donorID)
+          for (var existingDonation of donationHistory) {
+            console.log(existingDonation)
+            if (existingDonation.date.toISOString().slice(0, 11) == donation.date) {
+              console.log(`Donation on date ${donation.date} already exists`)
+              donationExists = true
+            }
+          }
+          
+          if (!donationExists) {
+            // Create donation split array to look up or create KID
+            // Map from parsed data from spreadsheet to organisation IDs
+            var split = await donationHelpers.createDonationSplitArray()
+
+            // Fetch or create KID
+            var KID = DAO.distributions.getKIDbySplit(split, donorID)
+            DAO.donations.add()
+          }
+        }
+        
 
         failures.push(donation)
       }
 
       // TODO: Check if the specific donation exists already
+      // TODO: (Possibly) check if the distibution matches for same day donations
+      // TODO: Explain why failed donations failed 
+      // TODO: 
 
       res.json({
         status: 200,
