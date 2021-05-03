@@ -19,7 +19,7 @@ module.exports = async (req, res, next) => {
     /**
      * We fetch a connection to reuse
      */
-    const connection;
+    let connection;
     try {
         connection = await DAO.donations.pool.getConnection()
     } catch(ex) {
