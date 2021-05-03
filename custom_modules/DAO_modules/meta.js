@@ -1,4 +1,4 @@
-var con
+var pool
 
 //region Get
 
@@ -26,10 +26,26 @@ async function getDataOwners() {
 /**
  * Gets the default owner ID from the DB
  * @returns {Number} The default owner ID
+ * @param {import('mysql2/promise').PromisePoolConnection | null} [connection=null] A reused connection. If not provided, will create connection and release it when done.
  */
-async function getDefaultOwnerID() {
-    var [res] = await con.query('SELECT ID FROM Data_owner WHERE `default` = 1')
-    return res[0].ID
+async function getDefaultOwnerID(connection) {
+    try {
+        var con = connection ?? await pool.getConnection()
+        var [res] = await con.query('SELECT ID FROM Data_owner WHERE `default` = 1')
+        
+        //Only release connection if it was not provided as an argument
+        if (connection == null)
+            con.release()
+
+        return res[0].ID
+    }
+    catch(ex) {
+        //Only release connection if it was not provided as an argument
+        if (connection == null)
+            con.release()
+
+        throw ex
+    }
 }
 
 //endregion
@@ -49,5 +65,5 @@ module.exports = {
     getDataOwners,
     getDefaultOwnerID,
 
-    setup: (dbPool) => { con = dbPool }
+    setup: (dbPool) => { pool = dbPool }
 }

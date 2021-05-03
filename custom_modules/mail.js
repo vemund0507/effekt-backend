@@ -12,10 +12,11 @@ const fs = require('fs-extra')
  * Sends a donation reciept
  * @param {number} donationID
  * @param {string} reciever Reciever email
+ * @param {import('mysql2/promise').PromisePoolConnection | null} connection Reusable db connection
 */
-async function sendDonationReciept(donationID, reciever = null) {
+async function sendDonationReciept(donationID, reciever = null, connection = null) {
     try {
-      var donation = await DAO.donations.getByID(donationID)
+      var donation = await DAO.donations.getByID(donationID, connection)
       if (!donation.email)  {
         console.error("No email provided for donation ID " + donationID)
         return false
@@ -27,7 +28,7 @@ async function sendDonationReciept(donationID, reciever = null) {
     }
 
     try {
-      var split = await DAO.distributions.getSplitByKID(donation.KID)
+      var split = await DAO.distributions.getSplitByKID(donation.KID, connection)
     } catch (ex) {
       console.error("Failed to send mail donation reciept, could not get donation split by KID")
       console.error(ex)
@@ -72,10 +73,11 @@ async function sendDonationReciept(donationID, reciever = null) {
  * Sends a donation reciept with notice of old system
  * @param {number} donationID
  * @param {string} reciever Reciever email
+ * @param {import('mysql2/promise').PromisePoolConnection | null} connection Reusable db connection
 */
-async function sendEffektDonationReciept(donationID, reciever = null) {
+async function sendEffektDonationReciept(donationID, reciever = null, connection = null) {
     try {
-        var donation = await DAO.donations.getByID(donationID)
+        var donation = await DAO.donations.getByID(donationID, connection)
         if (!donation.email)  {
           console.error("No email provided for donation ID " + donationID)
           return false
@@ -87,7 +89,7 @@ async function sendEffektDonationReciept(donationID, reciever = null) {
     }
 
     try {
-        var split = await DAO.distributions.getSplitByKID(donation.KID)
+        var split = await DAO.distributions.getSplitByKID(donation.KID, connection)
     } catch (ex) {
         console.error("Failed to send mail donation reciept, could not get donation split by KID")
         console.error(ex)

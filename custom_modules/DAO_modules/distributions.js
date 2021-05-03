@@ -179,6 +179,7 @@ async function getKIDbySplit(split, donorID) {
 /**
  * Gets organizaitons and distribution share from a KID
  * @param {number} KID 
+ * @param {import('mysql2/promise').PromisePoolConnection | null} connection Reusable db connection
  * @returns {[{
  *  ID: number,
  *  full_name: string,
@@ -186,7 +187,7 @@ async function getKIDbySplit(split, donorID) {
  *  percentage_share: Decimal
  * }]}
  */
-async function getSplitByKID(KID) {
+async function getSplitByKID(KID, connection = null) {
     try {
         var con = await pool.getConnection()
 
@@ -206,11 +207,14 @@ async function getSplitByKID(KID) {
             WHERE 
                 KID = ?`, [KID])
 
-        con.release()
+        if (connection == null)
+            con.release()
+
         if (result.length == 0) return new Error("NOT FOUND | No distribution with the KID " + KID)
         return result
     } catch(ex) {
-        con.release()
+        if (connection == null)
+            con.release()
         throw ex
     }
 }

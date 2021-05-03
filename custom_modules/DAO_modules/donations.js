@@ -1,6 +1,9 @@
 const sqlString = require('sqlstring')
 const distributions = require('./distributions.js')
 
+/**
+ * @type {import('mysql2/promise').PromisePool}
+ */
 var pool
 var DAO
 
@@ -179,10 +182,11 @@ async function ExternalPaymentIDExists(externalPaymentID, paymentID) {
  * Gets donation by ID
  * @param {numer} donationID 
  * @returns {Donation} A donation object
+ * @param {import('mysql2/promise').PromisePoolConnection} connection Reusable db connection
  */
-async function getByID(donationID) {
+async function getByID(donationID, connection = null) {
     try {
-        var con = await pool.getConnection()
+        var con = connection ?? await pool.getConnection()
 
         var [getDonationFromIDquery] = await con.query(`
             SELECT 
@@ -232,10 +236,15 @@ async function getByID(donationID) {
             share: split.percentage_share
         }))
 
-        con.release()
+        if (connection == null)
+            con.release()
+
         return donation
     } catch(ex) {
-        con.release()
+
+        if (connection == null)
+            con.release()
+            
         throw ex
     }
 }
@@ -556,11 +565,12 @@ async function getHistory(donorID) {
  * @param {Date} [registeredDate=null] Date the transaction was confirmed
  * @param {String} [externalPaymentID=null] Used to track payments in external payment systems (paypal and vipps ex.)
  * @param {Number} [metaOwnerID=null] Specifies an owner that the data belongs to (e.g. The Effekt Foundation). Defaults to selection default from DB if none is provided.
+ * @param {import('mysql2/promise').PromisePoolConnection | null} [connection=null] A reused connection. If not provided, will create connection and release it when done.
  * @return {Number} The donations ID
  */
-async function add(KID, paymentMethodID, sum, registeredDate = null, externalPaymentID = null, metaOwnerID = null) {
+async function add(KID, paymentMethodID, sum, registeredDate = null, externalPaymentID = null, metaOwnerID = null, connection = null) {
     try {
-        var con = await pool.getConnection()
+        var con = connection ?? await pool.getConnection()
         var [donorIDQuery] = await con.query("SELECT Donor_ID FROM Combining_table WHERE KID = ? LIMIT 1", [KID])
 
         if (donorIDQuery.length != 1) { 
@@ -573,7 +583,7 @@ async function add(KID, paymentMethodID, sum, registeredDate = null, externalPay
          */
 
         if (metaOwnerID == null) {
-            metaOwnerID = await DAO.meta.getDefaultOwnerID()
+            metaOwnerID = await DAO.meta.getDefaultOwnerID(con)
         }
 
         /*  External transaction ID can be passed to prevent duplicates.
@@ -590,15 +600,20 @@ async function add(KID, paymentMethodID, sum, registeredDate = null, externalPay
         if (typeof registeredDate === "string")
             registeredDate = new Date(registeredDate)
 
-
         var donorID = donorIDQuery[0].Donor_ID
 
         var [addDonationQuery] = await con.query("INSERT INTO Donations (Donor_ID, Payment_ID, PaymentExternal_ID, sum_confirmed, timestamp_confirmed, KID_fordeling, Meta_owner_ID) VALUES (?,?,?,?,?,?,?)", [donorID, paymentMethodID, externalPaymentID, sum, registeredDate, KID, metaOwnerID])
 
-        con.release()
+        //Only release connection if it was not provided as an argument
+        if (connection == null)
+            con.release()
+
         return addDonationQuery.insertId
     } catch(ex) {
-        con.release()
+        //Only release connection if it was not provided as an argument
+        if (connection == null)
+            con.release()
+
         throw ex
     }
 }
@@ -681,6 +696,9 @@ module.exports = {
     registerConfirmedByIDs,
     getHistogramBySum,
     remove,
+
+    //For reuse of connection
+    pool,
 
     setup: (dbPool, DAOObject) => { pool = dbPool, DAO = DAOObject }
 }

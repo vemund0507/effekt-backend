@@ -12,7 +12,7 @@ const fieldMapping = {
 
 module.exports = {
     /**
-     * @typedef BankCustomTransactions
+     * @typedef BankCustomTransaction
      * @property {string} message
      * @property {number} amount
      * @property {string} KID
@@ -23,7 +23,7 @@ module.exports = {
     /**
      * Parses a the custom bank format for donations without KID
      * @param {Buffer} report A file buffer, from a csv comma seperated file
-     * @return {Array<BankCustomTransactions>} 
+     * @return {Array<BankCustomTransaction>} 
      */
     parseReport: function(report) {
         let reportText = report.toString();
@@ -55,7 +55,7 @@ module.exports = {
     /**
      * Parses a row from the 
      * @param {Array<string>} row 
-     * @returns {BankCustomTransactions}
+     * @returns {BankCustomTransaction}
      */
     parseRow: function(row) {
         return {
