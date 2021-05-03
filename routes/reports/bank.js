@@ -8,6 +8,9 @@ const BANK_NO_KID_ID = 5
 module.exports = async (req, res, next) => {
     let metaOwnerID = parseInt(req.body.metaOwnerID)
 
+    if (isNaN(metaOwnerID))
+        metaOwnerID = null
+
     var data = req.files.report.data.toString('UTF-8')
 
     try {
@@ -21,7 +24,7 @@ module.exports = async (req, res, next) => {
      */
     let connection;
     try {
-        connection = await DAO.donations.pool.getConnection()
+        connection = await DAO.pool.getConnection()
     } catch(ex) {
         console.error(ex)
         res.status(500).json({
@@ -34,7 +37,7 @@ module.exports = async (req, res, next) => {
     /**
      * Construct task list
      */
-    const tasklist = transactions.map(t => addDonation(transactions, metaOwnerID, connection))
+    const tasklist = transactions.map(t => addDonation(t, metaOwnerID, connection))
     
     /**
      * Add all donations in paralell
@@ -106,8 +109,9 @@ async function addDonation(transaction, metaOwnerID, connection) {
         }
 
         try {
+            console.log(config.env)
             if (config.env === 'production') {
-                console.log(`Sending email for transaction with external id ${transaction.externalRef}`)
+                console.log(`Sending email for transaction with donation id ${donationID}`)
                 if (metaOwnerID === 1) {
                     //Send special reciept if the donation is for the old effekt system
                     await mail.sendEffektDonationReciept(donationID);
@@ -115,7 +119,7 @@ async function addDonation(transaction, metaOwnerID, connection) {
                 else {
                     await mail.sendDonationReciept(donationID);
                 }
-                console.log(`Email sent for transaction with external id ${transaction.externalRef}`)
+                console.log(`Email sent for transaction with donation id ${donationID}`)
             }
         } catch (ex) {
             console.error(`Failed to send donation reciept for donation with ID ${donationID}`)
@@ -123,7 +127,7 @@ async function addDonation(transaction, metaOwnerID, connection) {
         }
     } else  {
         return {
-            reason: no_kid,
+            reason: failed_reasons.no_kid,
             transaction: transaction
         }
     }

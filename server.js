@@ -3,6 +3,7 @@ console.log("| gieffektivt.no donation backend (╯°□°）╯︵ ┻━┻ |"
 console.log("--------------------------------------------------")
 const config = require('./config.js')
 console.log("Config loaded")
+console.log("Environment: " + config.env)
 
 const express = require('express')
 const fileUpload = require('express-fileupload')

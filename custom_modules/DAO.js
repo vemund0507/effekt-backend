@@ -1,6 +1,7 @@
 const config = require('../config')
 const mysql = require('mysql2/promise')
 
+var pool
 module.exports = {
     //Submodules
     donors: require('./DAO_modules/donors'),
@@ -16,6 +17,7 @@ module.exports = {
     meta: require('./DAO_modules/meta'),
     initialpaymentmethod: require('./DAO_modules/initialpaymentmethod'),
     facebook: require('./DAO_modules/facebook'),
+    pool,
 
     /**
      * Sets up a connection to the database, uses config.js file for parameters
@@ -89,6 +91,8 @@ module.exports = {
                 throw new Error("Fatal error, failed to commit transaction")
             }
         }
+
+        this.pool = dbPool
 
         cb()
     }
