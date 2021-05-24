@@ -8,8 +8,6 @@ const express = require('express')
 const fileUpload = require('express-fileupload')
 const pretty = require('express-prettify')
 const path = require('path')
-const rateLimit = require('express-rate-limit')
-const honeypot = require('honeypot')
 const logging = require('./handlers/loggingHandler.js')
 const http = require('http')
 const hogan = require('hogan-express')
@@ -53,28 +51,6 @@ DAO.connect(() => {
   }))
   app.enable('trust proxy')
 
-  //Honeypot
-  const pot = new honeypot(config.honeypot_api_key)
-  app.use((req, res, next) => {
-    pot.query(req.ip, function (err, response) {
-      if (!response) {
-        next()
-      } else {
-        res.status(403).json({
-          status: 403,
-          content: "IP blacklisted"
-        })
-      }
-    })
-  })
-
-  //Rate limiting
-  app.use(new rateLimit({
-    windowMs: 60 * 1000, // 1 minute
-    max: 1000, //limit each IP to 50 requests per minute
-    delayMs: 0 // disable delaying - full speed until the max limit is reached 
-  }))
-
   //Set cross origin as allowed
   app.use(function (req, res, next) {
     res.setHeader('Access-Control-Allow-Origin', '*')
@@ -95,7 +71,6 @@ DAO.connect(() => {
 
   //Server
   const mainServer = http.createServer(app)
-  const websocketsHandler = require('./handlers/websocketsHandler.js')(mainServer)
 
   //Routes
   const donorsRoute = require('./routes/donors')
@@ -103,7 +78,7 @@ DAO.connect(() => {
   const distributionsRoute = require('./routes/distributions')
   const organizationsRoute = require('./routes/organizations')
   const reportsRoute = require('./routes/reports')
-  const paypalRoute = require('./routes/paypal')(websocketsHandler)
+  const paypalRoute = require('./routes/paypal')
   const vippsRoute = require('./routes/vipps')
   const paymentRoute = require('./routes/payment')
   const csrRoute = require('./routes/csr')

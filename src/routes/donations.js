@@ -16,7 +16,6 @@ const mail = require('../custom_modules/mail')
 const vipps = require('../custom_modules/vipps')
 const dateRangeHelper = require('../custom_modules/dateRangeHelper')
 const donationHelpers = require('../custom_modules/donationHelpers')
-const rateLimit = require('express-rate-limit')
 
 router.post("/register", async (req,res,next) => {
   if (!req.body) return res.sendStatus(400)
@@ -335,12 +334,7 @@ router.get("/history/:donorID", authMiddleware(authRoles.read_all_donations), as
   }
 })
 
-let historyRateLimit = new rateLimit({
-    windowMs: 60*1000*60, // 1 hour
-    max: 5,
-    delayMs: 0 // disable delaying - full speed until the max limit is reached 
-  })
-router.post("/history/email", historyRateLimit, async (req, res, next) => {
+router.post("/history/email", async (req, res, next) => {
   try {
     let email = req.body.email
     let id = await DAO.donors.getIDbyEmail(email)
