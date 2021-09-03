@@ -34,6 +34,14 @@ var DAO
   * @prop {Array} distributions
  */
 
+/** @typedef RecurringNoKIDDonation
+ * @prop {number} donorID
+ * @prop {string} KID
+ * @prop {number} numDonations
+ * @prop {string} donorName
+ * @prop {number} latestSum
+ */
+
 //region Get
 /**
  * Gets all donations, ordered by the specified column, limited by the limit, and starting at the specified cursor
@@ -114,8 +122,6 @@ async function getAll(sort, page, limit = 10, filter = null) {
         throw ex
     }
 }
-
-
 
 /**
  * Gets a histogram of all donations by donation sum
@@ -610,6 +616,33 @@ async function getHistory(donorID) {
     }
 }
 
+/**
+ * Fetches recurring donations with method Bank U/KID
+ * That is, donations that have the same distribution and
+ * have repeat donations
+ * @returns {Array<RecurringNoKIDDonation>}
+ */
+async function getRecurringNoKidDonations() {
+    try {
+        var con = await pool.getConnection()
+        let [recurringDonations] = await con.query(`SELECT * FROM Recurring_no_kid_bank_donors`)
+
+        recurringDonations = recurringDonations.map((recurring) => ({
+            donorID: recurring.DonorID,
+            KID: recurring.KID,
+            numDonations: recurring.NumDonatoins,
+            donorName: recurring.DonorName,
+            latestSum: recurring.LatestSum
+        }))
+
+        con.release()
+        return recurringDonations
+    } catch(ex) {
+        con.release()
+        throw ex
+    }
+}
+
 //endregion
 
 //region Add
@@ -744,6 +777,7 @@ module.exports = {
     getSummaryByYear,
     getHistory,
     getLatestByKID,
+    getRecurringNoKidDonations,
     ExternalPaymentIDExists,
     add,
     registerConfirmedByIDs,

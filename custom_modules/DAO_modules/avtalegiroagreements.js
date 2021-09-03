@@ -124,7 +124,7 @@ async function exists(KID) {
  * @param {string | number | Date} page Used for pagination
  * @param {number=10} limit Agreement count limit per page, defaults to 10
  * @param {object} filter Filtering object
- * @return {[AvtaleGiro]} Array of AvtaleGiro agreements
+ * @return {Array<import('../parsers/avtalegiro').AvtalegiroAgreement>} Array of AvtaleGiro agreements
  */
  async function getAgreements(sort, page, limit, filter) {
     let con = await pool.getConnection()
@@ -277,7 +277,7 @@ async function getByKID(KID) {
 /**
  * Returns all agreements with a given payment date
  * @param {Date} date 
- * @returns {Array<AvtalegiroAgreement>}
+ * @returns {Array<import('../parsers/avtalegiro').AvtalegiroAgreement>}
  */
 async function getByPaymentDate(dayInMonth) {
     try {
@@ -305,6 +305,47 @@ async function getByPaymentDate(dayInMonth) {
         ))
     }
     catch (ex) {
+        con.release()
+        throw ex
+    }
+}
+
+/**
+ * Gets all agreements associated with donor
+ * @param {number} donorID
+ * @returns {Array<import('../parsers/avtalegiro').AvtalegiroAgreement>} Agreements
+ */
+async function getByDonor(donorID) {
+    try {
+        var con = await pool.getConnection()
+        let [agreements] = await con.query(`SELECT 
+            A.ID,
+            A.payment_date,
+            A.amount, 
+            A.notice,
+            A.KID,
+            A.active
+            
+            FROM Avtalegiro_agreements as A
+            INNER JOIN Combining_table as C
+                ON A.KID = C.KID
+                
+            WHERE C.Donor_ID = ?
+            
+            GROUP BY A.ID`, [donorID])
+
+        agreements = agreements.map((agreement) => ({
+            id: agreement.ID,
+            paymentDate: agreement.payment_date,
+            amount: agreement.amount,
+            notice: agreement.notice,
+            KID: agreement.KID,
+            active: agreement.active
+        }))
+
+        con.release()
+        return agreements
+    } catch(ex) {
         con.release()
         throw ex
     }
@@ -355,6 +396,7 @@ module.exports = {
     remove,
     exists, 
     getByKID,
+    getByDonor,
     getAgreementSumHistogram,
     getAgreements,
     getAgreementReport,

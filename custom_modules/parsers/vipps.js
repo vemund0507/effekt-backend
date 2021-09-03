@@ -27,8 +27,6 @@ module.exports = {
       var data = parse(reportText, { delimiter: ';', bom: true, skip_empty_lines: true })
     }
     catch(ex) {
-      console.error("Using semicolon delimiter failed, trying comma.")
-
       try {
         var data = parse(reportText, { delimiter: ',', bom: true, skip_empty_lines: true })
       }

@@ -21,7 +21,7 @@ beforeEach(() => {
     getDnonorStub.reset()
 })
 
-describe('', () => {
+describe('Mailchimp', () => {
     it('Sens a request to mailchimp api when subscribe called with correct parameters', async () => {
         getDnonorStub.resolves({
             id: 20,

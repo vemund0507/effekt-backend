@@ -182,12 +182,12 @@ async function getKIDbySplit(split, donorID, minKidLength = 0) {
 /**
  * Gets organizaitons and distribution share from a KID
  * @param {number} KID 
- * @returns {[{
+ * @returns {Array<{
  *  ID: number,
  *  full_name: string,
  *  abbriv: string,
  *  percentage_share: Decimal
- * }]}
+ * }>}
  */
 async function getSplitByKID(KID) {
     try {

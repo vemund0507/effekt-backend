@@ -619,6 +619,17 @@ async function sendTaxDeductions(taxDeductionRecord, year) {
 }
 
 /**
+ * Sends a mail to a donor with recurring bank donations,
+ * to make it easy to transition to AvtaleGiro
+ * @param {string} KID 
+ * @param {number} sum 
+ * @param {string} donorName 
+ */
+async function sendAvtalegiroConversionCall(KID, sum, donorName) {
+  //TODO
+}
+
+/**
  * Sends OCR file for backup
  * @param {Buffer} fileContents 
  */
@@ -719,5 +730,6 @@ module.exports = {
   sendFacebookTaxConfirmation,
   sendTaxDeductions,
   sendAvtalegiroNotification,
+  sendAvtalegiroConversionCall,
   sendOcrBackup
 }

@@ -17,7 +17,7 @@ const donors = [
     }
 ]
 
-describe('Donor helper works as expected', () => {
+describe('Donor helper', () => {
     describe('getFirstname works', () => {
         let firstname = donorHelper.getFirstname(donors[0])
         expect(firstname).to.be.equal("John")

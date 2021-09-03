@@ -2,7 +2,7 @@ const chai = require('chai')
 const crypto = require('../custom_modules/authorization/crypto.js')
 const expect = (chai.expect)
 
-describe('auth', function() {
+describe('Authentification', function() {
     describe('getPasswordResetToken', function() {
         it('should be a function', function() {
             expect(crypto.getPasswordResetToken).to.be.a('function')
