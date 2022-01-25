@@ -557,7 +557,71 @@ async function sendTaxDeductions(taxDeductionRecord, year) {
 
     return true
   } catch(ex) {
-    console.error("Failed to tax deduction mail")
+    console.error("Failed to send tax deduction mail")
+    console.error(ex)
+    return ex.statusCode
+  }
+}
+
+/**
+ * Sends donors that have donated more than the limit for tax deduction, but
+ * for which we are missing an SSN an email to remind them to add their SSN
+ * to recieve the deduction
+ * @param {TaxDeductionRecord} taxDeductionRecord 
+ * @param {number} year The year the tax deductions are counted for
+ */
+ async function sendTaxDeductionsMissingSsn(taxDeductionRecord, year) {
+  try {
+    await send({
+      reciever: taxDeductionRecord.email,
+      subject: `gieffektivt.no - Årsoppgave ${year}`,
+      templateName: "taxDeductionMissingSsn",
+      templateData: { 
+          header: "Hei " + taxDeductionRecord.firstname + ",",
+          donationSum: taxDeductionRecord.amount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "&#8201;"),
+          fullname: taxDeductionRecord.fullname,
+          ssn: taxDeductionRecord.ssn,
+          year: year.toString(),
+          nextYear: (year+1).toString(),
+          reusableHTML
+      }
+    })
+
+    return true
+  } catch(ex) {
+    console.error("Failed to send tax deduction (missing ssn) mail")
+    console.error(ex)
+    return ex.statusCode
+  }
+}
+
+/**
+ * Sends donors that have donated more than the limit for tax deduction, but
+ * for which we are missing an SSN an email to remind them to add their SSN
+ * to recieve the deduction
+ * @param {TaxDeductionRecord} taxDeductionRecord 
+ * @param {number} year The year the tax deductions are counted for
+ */
+ async function sendTaxDeductionsUnderLimit(taxDeductionRecord, year) {
+  try {
+    await send({
+      reciever: taxDeductionRecord.email,
+      subject: `gieffektivt.no - Årsoppgave ${year}`,
+      templateName: "taxDeductionUnderLimit",
+      templateData: { 
+          header: "Hei " + taxDeductionRecord.firstname + ",",
+          donationSum: taxDeductionRecord.amount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "&#8201;"),
+          fullname: taxDeductionRecord.fullname,
+          ssn: taxDeductionRecord.ssn,
+          year: year.toString(),
+          nextYear: (year+1).toString(),
+          reusableHTML
+      }
+    })
+
+    return true
+  } catch(ex) {
+    console.error("Failed to send tax deduction (under limit) mail")
     console.error(ex)
     return ex.statusCode
   }
@@ -715,6 +779,8 @@ module.exports = {
   sendVippsErrorWarning,
   sendFacebookTaxConfirmation,
   sendTaxDeductions,
+  sendTaxDeductionsMissingSsn,
+  sendTaxDeductionsUnderLimit,
   sendAvtalegiroNotification,
   sendOcrBackup
 }

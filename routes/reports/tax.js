@@ -5,6 +5,7 @@ module.exports = async (req,res,next) => {
     try {
       if (!req.files || !req.files.report) return res.sendStatus(400)
       if (!req.body.year) return res.sendStatus(400)
+      if (!req.body.type) return res.sendStatus(400)
 
       let year = parseInt(req.body.year)
 
@@ -18,7 +19,18 @@ module.exports = async (req,res,next) => {
       for (let i = 0; i < records.length; i++) {
         const record = records[i]
 
-        let result = await mail.sendTaxDeductions(record, year)
+        let result
+        switch (req.body.type) {
+          case "report":
+            result = await mail.sendTaxDeductions(record, year)
+          case "missing_ssn":
+            result = await mail.sendTaxDeductionsMissingSsn(record, year)
+          case "under_limit":
+            result = await mail.sendTaxDeductionsUnderLimit(record, year)
+          default:
+            result = false
+        }
+        
         if (result === true)
           success++
         else
