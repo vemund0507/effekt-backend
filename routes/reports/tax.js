@@ -23,11 +23,15 @@ module.exports = async (req,res,next) => {
         switch (req.body.type) {
           case "report":
             result = await mail.sendTaxDeductions(record, year)
+            break
           case "missing_ssn":
             result = await mail.sendTaxDeductionsMissingSsn(record, year)
+            break
           case "under_limit":
             result = await mail.sendTaxDeductionsUnderLimit(record, year)
+            break
           default:
+            console.error(`${req.body.type} is not a valid type`)
             result = false
         }
         
