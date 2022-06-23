@@ -36,26 +36,26 @@ const replacedOrgsInfo =
   'Fra denne datoen støtter vi ikke lenger donasjoner til Deworm the World, The END Fund, Sightsavers og Project Healthy Children ' +
   'som opplyst på våre nettsider, i nyhetsbrev, på epost og gjennom sosiale medier.' +
   '<br/>' +
-  'Andelene som var oppført til disse organisasjonene blir i stedet gitt til vår standardfordeling som nå er <a href="https://www.givewell.org/maximum-impact-fund" style="color: #fb8f29;">GiveWell Maximum Impact Fund</a>. ' +
-  'Om du ønsker en annen fordeling kan du gå inn på <a href="https://gieffektivt.no/gi" style="color: #fb8f29;">www.gieffektivt.no/gi</a> og fylle ut donasjonsskjema på nytt med ønsket fordeling. Ta kontakt om du har noen spørsmål.' + 
+  'Andelene som var oppført til disse organisasjonene blir i stedet gitt til vår standardfordeling som nå er <a href="https://www.givewell.org/maximum-impact-fund" style="color: #000000;">GiveWell Maximum Impact Fund</a>. ' +
+  'Om du ønsker en annen fordeling kan du gå inn på <a href="https://gieffektivt.no/" style="color: #000000;">www.gieffektivt.no/</a> og fylle ut donasjonsskjema på nytt med ønsket fordeling. Ta kontakt om du har noen spørsmål.' + 
   '<br/><br/>';
 
 const taxDeductionInfo =
-  'Donasjoner til oss som summerer til kr 500-50 000 i kalenderåret kvalifiserer til skattefradrag. Dersom du har oppgitt fødselsnummer eller organisasjonsnummer registrerer vi dette automatisk på neste års skattemelding. ' + 
-  'Les mer <a href= "https://gieffektivt.no/skattefradrag" style="color: #fb8f29;">her</a>.' + 
+  'Donasjoner til oss som summerer til kr 500-25 000 i kalenderåret kvalifiserer til skattefradrag. Dersom du har oppgitt fødselsnummer eller organisasjonsnummer registrerer vi dette automatisk på neste års skattemelding. ' + 
+  'Les mer <a href= "https://gieffektivt.no/skattefradrag" style="color: #000000;">her</a>.' + 
   '<br/><br/>';
 
 const greeting = 
   'Hvis du har noen spørsmål eller tilbakemeldinger kan du alltid ta kontakt med oss ved å sende en mail til ' +
-  '<a href= "mailto:donasjon@gieffektivt.no" style="color: #fb8f29;">donasjon@gieffektivt.no</a>' + 
+  '<a href= "mailto:donasjon@gieffektivt.no" style="color: #000000;">donasjon@gieffektivt.no</a>.' + 
   '<br/><br/>' +
   'Håper du får en fantastisk dag!<br/><br/>' +
   '<b>Vennlig hilsen</b><br/>' +
-  'oss i <a href= "https://gieffektivt.no" style="color: #fb8f29;">gieffektivt.no</a>' +
+  'oss i Gi Effektivt' +
   '<br/><br/>';
 
 const footer = 
-    '<table class="footer" bgcolor="#c1bbbb" width="100%" border="0" cellspacing="0" cellpadding="0">' +
+    '<table class="footer" bgcolor="#000" width="100%" border="0" cellspacing="0" cellpadding="0">' +
         '<tr>' +
             '<td align="center" class="footercopy">' +
                 '<table width="194" align="left" border="0" cellpadding="0" cellspacing="0">' +
@@ -135,7 +135,7 @@ async function sendDonationReciept(donationID, reciever = null) {
     try {
       await send({
         reciever: (reciever ? reciever : donation.email),
-        subject: "gieffektivt.no - Din donasjon er mottatt",
+        subject: "Gi Effektivt - Din donasjon er mottatt",
         templateName: "reciept",
         templateData: {
             header: "Hei " + donation.donor + ",",
@@ -196,7 +196,7 @@ async function sendEffektDonationReciept(donationID, reciever = null) {
     try {
         await send({
         reciever: (reciever ? reciever : donation.email),
-        subject: "gieffektivt.no - Din donasjon er mottatt",
+        subject: "Gi Effektivt - Din donasjon er mottatt",
         templateName: "recieptEffekt",
         templateData: {
             header: "Hei " + donation.donor + ",",
@@ -271,7 +271,7 @@ async function sendDonationRegistered(KID, sum) {
       var KIDstring = KID.toString()
   
       await send({
-        subject: 'gieffektivt.no - Donasjon klar for innbetaling',
+        subject: 'Gi Effektivt - Donasjon klar for innbetaling',
         reciever: donor.email,
         templateName: 'registered',
         templateData: {
@@ -302,7 +302,7 @@ async function sendFacebookTaxConfirmation(email, fullName, paymentID) {
   try {
 
     await send({
-      subject: 'gieffektivt.no - Facebook-donasjoner registrert for skattefradrag',
+      subject: 'Gi Effektivt - Facebook-donasjoner registrert for skattefradrag',
       reciever: email,
       templateName: 'facebookTaxConfirmation',
       templateData: {
@@ -352,7 +352,7 @@ async function sendVippsAgreementChange(agreementCode, change, newValue = "") {
       reciever: email,
       templateName: 'vippsAgreementChange',
       templateData: {
-        header: "Hei, " + donor.full_name,
+        header: "Hei, " + donor.name,
         change,
         newValue,
         organizations,
@@ -512,7 +512,7 @@ async function sendDonationHistory(donorID) {
     try {
       await send({
         reciever: email,
-        subject: "gieffektivt.no - Din donasjonshistorikk",
+        subject: "Gi Effektivt - Din donasjonshistorikk",
         templateName: templateName,
         templateData: { 
             header: "Hei " + donor.name + ",",
@@ -659,7 +659,7 @@ async function sendOcrBackup(fileContents) {
  * @returns {boolean | number} True if success, status code else
  */
 async function send(options) {
-    const templateRoot = '/views/mail/' + options.templateName
+    const templateRoot = './dist/views/mail/' + options.templateName
 
     var templateRawHTML = await fs.readFile(templateRoot + "/index.html", 'utf8')
     var templateHTML = template(templateRawHTML, options.templateData)

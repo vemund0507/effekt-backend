@@ -19,7 +19,7 @@
         .boldTableRow {padding: 0 0 0 0; font-size: 16px; line-height: 22px; font-weight: bold}
         .tableRow {padding: 0 0 10px 0; font-size: 16px; line-height: 22px;}
         .bodycopy {font-size: 16px; line-height: 22px;}
-        .footer {padding: 20px 30px 15px 30px;}
+        .footer { padding: 20px 30px 15px 30px; max-width: 600px; margin: 0 auto; }
         .footercopy {font-family: sans-serif; font-size: 16px; color: #ffffff;}
         .footercopy a {color: #ffffff; text-decoration: underline;}
         .emailHeaderImage {
@@ -36,13 +36,13 @@
     </style>
 </head>
 
-<body yahoo bgcolor="#f6f8f1">
-<table width="100%" bgcolor="#f6f8f1" border="0" cellpadding="0" cellspacing="0">
+<body yahoo bgcolor="#fafafa">
+<table width="100%" bgcolor="#fafafa" border="0" cellpadding="0" cellspacing="0">
     <tr>
         <td>
             <table class="content" bgcolor="#ffffff" align="center" cellpadding="0" cellspacing="0" border="0">
                 <tr>
-                    <td bgcolor="#c7d8a7" class="header">
+                    <td bgcolor="#000" class="header">
                         <table align="left" border="0" cellpadding="0" cellspacing="0" style="max-width:640px; padding: 0 0 0 0;">
                             <tr>
                                 <td height="auto" style="padding: 0 0 0 0;">
@@ -106,7 +106,7 @@
                                     <% } %>
                                     <br/><br/>
                                     
-                                    <% if(this.change !== "STOPPED") { %>
+                                    <% if(false && "beholder koden i tilfelle den skal brukes senere") { %>
                                         <h3>Betalingsavtale</h3>
                                         <table class="donation-summary" border="0" cellspacing="0" cellpadding="0">
                                         <tbody>
@@ -190,49 +190,53 @@
                                                 </td>
                                         </tbody>
                                         </table>
-                                        
-                                        <h3>Fordeling</h3>
-                                        <% for (var i = 0; i < this.organizations.length; i++) { %>
-                                            <table width="100%" border="0" cellspacing="0" cellpadding="0">
-                                                <tr>
-                                                    <td>
-                                                        <table width="275" align="left" border="0" cellpadding="0" cellspacing="0">
-                                                            <tr>
-                                                                <td class="boldTableRow">
-                                                                    <% this.organizations[i].name %>
-                                                                </td>
-                                                            </tr>
-                                                        </table>
-                                                        <!--[if (gte mso 9)|(IE)]>
-                                                        <table width="380" align="left" cellpadding="0" cellspacing="0" border="0">
-                                                            <tr>
-                                                                <td>
-                                                        <![endif]-->
-                                                        <table width="150" align="left" border="0" cellpadding="0" cellspacing="0">
-                                                            <tr>
-                                                                <td class="tableRow">
-                                                                    <% this.organizations[i].percentage%> %
-                                                                </td>
-                                                            </tr>
-                                                        </table>
-                                                        <!--[if (gte mso 9)|(IE)]>
-                                                        <table width="380" align="left" cellpadding="0" cellspacing="0" border="0">
-                                                            <tr>
-                                                                <td>
-                                                        <![endif]-->
-                                                    </td>
-                                                </tr>
-                                            </table>
-                                        <% } %>
                                     <% } %>
+
+                                    <% if (this.change == "SHARES") { %>
+                                        <h3>Fordeling</h3>
+                                            <% for (var i = 0; i < this.organizations.length; i++) { %>
+                                                <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                                                    <tr>
+                                                        <td>
+                                                            <table width="275" align="left" border="0" cellpadding="0" cellspacing="0">
+                                                                <tr>
+                                                                    <td class="boldTableRow">
+                                                                        <% this.organizations[i].name %>
+                                                                    </td>
+                                                                </tr>
+                                                            </table>
+                                                            <!--[if (gte mso 9)|(IE)]>
+                                                            <table width="380" align="left" cellpadding="0" cellspacing="0" border="0">
+                                                                <tr>
+                                                                    <td>
+                                                            <![endif]-->
+                                                            <table width="150" align="left" border="0" cellpadding="0" cellspacing="0">
+                                                                <tr>
+                                                                    <td class="tableRow">
+                                                                        <% this.organizations[i].percentage%> %
+                                                                    </td>
+                                                                </tr>
+                                                            </table>
+                                                            <!--[if (gte mso 9)|(IE)]>
+                                                            <table width="380" align="left" cellpadding="0" cellspacing="0" border="0">
+                                                                <tr>
+                                                                    <td>
+                                                            <![endif]-->
+                                                        </td>
+                                                    </tr>
+                                                </table>
+                                            <% } %>
+                                        <% } %>
                                     <br/><br/>
 
+                                    Du kan se alle dine betalingsavtaler ved å logge inn på <a href= "https://gieffektivt.no" style="color: #000000;">gieffektivt.no</a>.
+                                    <br/><br/>
                                     Hvis du har noen spørsmål eller tilbakemeldinger kan du alltid ta kontakt med oss
                                     ved å sende en mail til 
-                                    <a href= "mailto:donasjon@gieffektivt.no" style="color: #fb8f29;">donasjon@gieffektivt.no</a><br/><br/>
+                                    <a href= "mailto:donasjon@gieffektivt.no" style="color: #000000;">donasjon@gieffektivt.no</a><br/><br/>
                                     Håper du får en fantastisk dag!<br/><br/><br/>
                                     <b>Vennlig hilsen</b><br/>
-                                    oss i <a href= "https://gieffektivt.no" style="color: #fb8f29;">gieffektivt.no</a><br/><br/>
+                                    oss i <a href= "https://gieffektivt.no" style="color: #000000;">Gi Effektivt</a><br/><br/>
                                 </td>
                             </tr>
                         </table>
